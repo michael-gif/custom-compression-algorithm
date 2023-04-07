@@ -42,6 +42,7 @@ Filter out tokens with only two offsets.
 | `tokens`       | `offsets`  |
 |--------------- | ---------- |
 |`th`            | [0, 4]     |
+
 Above you can see only 2 tokens remain. Both tokens are `th` tokens.  
 So `the theatre` becomes `(th)e (th)eatre`
 
