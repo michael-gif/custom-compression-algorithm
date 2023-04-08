@@ -1,4 +1,5 @@
-# Single Threaded Tokenized Pointer Compression for Text (STTPCT)
+# Single Threaded Pattern-Based Pointer Compression for Text (STPBPCT)
+Compression algorithm that utilising a sliding window for repeated pattern identification, combined with 2 byte pointers which support a high capacity for patterns.
 
 ### Usage 
 Compression:  
