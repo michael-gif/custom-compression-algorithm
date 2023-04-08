@@ -44,13 +44,16 @@ def compress():
     size_before = len(input_text)
     size_after = len(metadata + compressed_text)
 
-    print(f'\nMetadata size: {len(metadata)} bytes')
-    print(f'Compressed text size: {len(compressed_text)} bytes')
-    print(f'Size before: {size_before} bytes')
-    print(f'Size after: {size_after} bytes')
-    print(f'Saving: {size_before - size_after} bytes')
-    print(f'Compressed file by {round(100 - ((size_after / size_before) * 100), 3)}%')
-    print(f'Time taken: {finish - start}s')
+    results = 'RESULTS'
+    print(f'\n{results:-^37}')
+    print(f"{'Metadata size':<25} {len(metadata)} bytes")
+    print(f"{'Compressed text size':<25} {len(compressed_text)} bytes")
+    print(f"{'Size before':<25} {size_before} bytes")
+    print(f"{'Size after':<25} {size_after} bytes")
+    print(f"{'Saving':<25} {size_before - size_after} bytes")
+    print(f"{'Compressed file by':<25} {round(100 - ((size_after / size_before) * 100), 3)}%")
+    print(f"{'Time taken':<25} {finish - start}s")
+    print(f"{results:-^37}")
 
 
 if __name__ == '__main__':
