@@ -25,3 +25,11 @@ Example: `1000000000000110` -> First bit is `1`, the integer inside is `6`
 - Generate the metadata for the file. Join all the patterns together, separated by null bytes.
 - Concatenate the compressed text to the end of the metadata
 - Write everything to file. Boom, compressed
+
+### Results
+| Input file                   | Size before (bytes) | Size after (bytes) | Difference (bytes) | % Difference | Time taken (s) |
+| ---------------------------- | ------------------- | ------------------ | ------------------ | ------------ | -------------- |
+| `bee_movie_script.txt`       | 49473               | 43096              | 6377               | 12.89        | 0.152116      |
+| `joker2019_movie_script.txt` | 226344              | 182467             | 43877              | 19.385       | 1.0762437      |
+
+As you can see, the compression works.

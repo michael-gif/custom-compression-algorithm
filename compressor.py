@@ -1,15 +1,13 @@
 import sys
+import time
 
 from compression_core import generate_tokens_and_offsets, create_pointer
 
 with open(sys.argv[1]) as f:
     input_text = f.read()
 
+start = time.perf_counter()
 generated_tokens = generate_tokens_and_offsets(input_text)
-
-with open('tokens.txt', 'w') as f:
-    for key, value in generated_tokens.items():
-        f.write(f'{key}: {value}\n')
 
 # sort the tokens in ascending order according to their offsets
 tokens = []
@@ -36,6 +34,8 @@ print('Writing to file')
 with open('compressed.txt', 'wb') as f:
     f.write(metadata + compressed_text)
 
+finish = time.perf_counter()
+
 print()
 print(f'Metadata size: {len(metadata)} bytes')
 print(f'Compressed text size: {len(compressed_text)} bytes')
@@ -45,3 +45,4 @@ print(f'Size before: {size_before} bytes')
 print(f'Size after: {size_after} bytes')
 print(f'Saving: {size_before - size_after} bytes')
 print(f'Compressed file by {round(100 - ((size_after / size_before) * 100), 3)}%')
+print(f'Time taken: {finish - start}s')
