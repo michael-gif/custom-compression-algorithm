@@ -1,28 +1,30 @@
+from collections import defaultdict
+
+
 def obtain_tokens_and_offsets(raw_input: str) -> dict:
-    def get_initial_tokens() -> list:
+    def get_initial_tokens():
         """
         Uses a sliding window to obtain every possible token.
+
+        Rather than appending to a list and returning said list, this method uses 'yield'.
+        'yield' creates a generator object which results in the method completing slightly faster
         :return:
         """
-        tokens = []
         for i in range(3, 4):
             window_size = i
             for j in range(len(raw_input) - window_size):
-                tokens.append((raw_input[j:j + window_size], j))
-        return tokens
+                yield raw_input[j:j + window_size], j
 
     def group_tokens(tokens: list) -> dict:
         """
         Groups the tokens into a dictionary. The keys are the tokens, and the values are lists of offsets
+        Example: {key: [1, 2, 3]}
         :param tokens:
         :return:
         """
-        grouped = {}
+        grouped = defaultdict(list)
         for token in tokens:
-            if token[0] not in grouped:
-                grouped[token[0]] = [token[1]]
-            else:
-                grouped[token[0]].append(token[1])
+            grouped[token[0]].append(token[1])
         return grouped
 
     def filter_tokens(tokens_dict: dict) -> dict:
@@ -105,7 +107,7 @@ def obtain_tokens_and_offsets(raw_input: str) -> dict:
         print('\r')
         return unique_tokens
 
-    tokens = get_initial_tokens()
+    tokens = list(get_initial_tokens())
     print(f'Generated tokens: {len(tokens)} tkns')
     grouped_tokens = group_tokens(tokens)
     print(f'Grouped tokens')
