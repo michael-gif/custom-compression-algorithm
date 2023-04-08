@@ -1,5 +1,6 @@
 import sys
 import time
+import cProfile
 
 from compression_core import *
 
@@ -53,3 +54,4 @@ def compress():
 
 if __name__ == '__main__':
     compress()
+    #cProfile.run('compress()', sort='cumtime')

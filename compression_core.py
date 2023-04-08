@@ -1,20 +1,30 @@
 def obtain_tokens_and_offsets(raw_input: str) -> dict:
     # generate all tokens and offsets
-    tokens = []
-    for i in range(3, 4):
-        window_size = i
-        for j in range(len(raw_input) - window_size):
-            tokens.append((raw_input[j:j + window_size], j))
-    print(f'Generated tokens: {len(tokens)} tkns')
+    def get_initial_tokens() -> list:
+        """
+        Uses a sliding window to obtain every possible token.
+        :return:
+        """
+        tokens = []
+        for i in range(3, 4):
+            window_size = i
+            for j in range(len(raw_input) - window_size):
+                tokens.append((raw_input[j:j + window_size], j))
+        return tokens
 
-    # group all the tokens into a dictionary
-    grouped_tokens = {}
-    for token in tokens:
-        if token[0] not in grouped_tokens:
-            grouped_tokens[token[0]] = [token[1]]
-        else:
-            grouped_tokens[token[0]].append(token[1])
-    print(f'Grouped tokens')
+    def group_tokens(tokens: list) -> dict:
+        """
+        Groups the tokens into a dictionary. The keys are the tokens, and the values are lists of offsets
+        :param tokens:
+        :return:
+        """
+        grouped = {}
+        for token in tokens:
+            if token[0] not in grouped:
+                grouped[token[0]] = [token[1]]
+            else:
+                grouped[token[0]].append(token[1])
+        return grouped
 
     def filter_tokens(tokens_dict: dict) -> dict:
         """
@@ -39,17 +49,17 @@ def obtain_tokens_and_offsets(raw_input: str) -> dict:
                 filtered_tokens[k] = v
         return filtered_tokens
 
-    # filter tokens
-    filtered_tokens = filter_tokens(grouped_tokens)
-    print(f'Filtered tokens: {sum(len(offsets) for offsets in filtered_tokens.values())} tkns')
-
-    # flatten token dictionary into ordered list, ordered by offset
-    flattened_tokens = []
-    for token, offsets in filtered_tokens.items():
-        flattened_token_list = [(token, off) for off in offsets]
-        flattened_tokens += flattened_token_list
-    sorted_tokens = sorted(flattened_tokens, key=lambda item: item[1])
-    print(f'Flattened tokens')
+    def flatten_tokens(tokens: dict) -> list:
+        """
+        Flattens the token dict into a list containing all of the tokens in the format (token, offset)
+        :param tokens:
+        :return:
+        """
+        flattened = []
+        for token, offsets in tokens.items():
+            flattened_token_list = [(token, off) for off in offsets]
+            flattened += flattened_token_list
+        return flattened
 
     def within_bounds(offset: int, offset_length: int, offset2: int, offset2_length: int) -> bool:
         if offset2 <= offset <= offset2 + offset2_length:
@@ -58,42 +68,58 @@ def obtain_tokens_and_offsets(raw_input: str) -> dict:
             return True
         return False
 
-    # remove overlapping tokens
-    print('Removing redundant tokens: ', end='')
-    number_of_tokens = len(sorted_tokens)
-    interval = number_of_tokens // 41
-    progress_bar = ['0', '.', '.', '.', '1', '.', '.', '.', '2', '.', '.', '.', '3', '.', '.', '.', '4', '.', '.', '.',
-                    '5', '.', '.', '.', '6', '.', '.', '.', '7', '.', '.', '.', '8', '.', '.', '.', '9', '.', '.', '.',
-                    '10']
-    progress_bar_index = 0
+    def remove_overlapping_tokens(tokens: list):
+        """
+        Efficiently checks if each token is overlapping the last. If so, discard the token and move to the next one.
+        :param tokens:
+        :return:
+        """
+        print('Removing redundant tokens: ', end='')
+        number_of_tokens = len(tokens)
+        interval = number_of_tokens // 41
+        progress_bar = ['0', '.', '.', '.', '1', '.', '.', '.', '2', '.', '.', '.', '3', '.', '.', '.', '4', '.', '.',
+                        '.',
+                        '5', '.', '.', '.', '6', '.', '.', '.', '7', '.', '.', '.', '8', '.', '.', '.', '9', '.', '.',
+                        '.',
+                        '10']
+        progress_bar_index = 0
 
-    unique_tokens = []
-    token_counter = 0
-    for token in sorted_tokens:
-        if not unique_tokens:
-            unique_tokens.append(token)
-            continue
-        last_token = unique_tokens[-1]
-        unique_token_offset = last_token[1]
-        token_offset = token[1]
-        if not within_bounds(token_offset, len(token[0]), unique_token_offset, len(last_token[0])):
-            unique_tokens.append(token)
+        unique_tokens = []
+        token_counter = 0
+        for token in tokens:
+            if not unique_tokens:
+                unique_tokens.append(token)
+                continue
+            last_token = unique_tokens[-1]
+            unique_token_offset = last_token[1]
+            token_offset = token[1]
+            if not within_bounds(token_offset, len(token[0]), unique_token_offset, len(last_token[0])):
+                unique_tokens.append(token)
 
-        # increment progress bar if needed
-        token_counter += 1
-        if token_counter == interval:
-            print(progress_bar[progress_bar_index], end='')
-            progress_bar_index += 1
-            token_counter = 0
-    print(f'\nRemoved redundant tokens: {len(unique_tokens)} tkns')
+            # increment progress bar if needed
+            token_counter += 1
+            if token_counter == interval:
+                print(progress_bar[progress_bar_index], end='')
+                progress_bar_index += 1
+                token_counter = 0
+        print('\r')
+        return unique_tokens
 
-    # The tokens are in an ordered list, so regroup them
-    grouped_tokens = {}
-    for token in unique_tokens:
-        if token[0] not in grouped_tokens:
-            grouped_tokens[token[0]] = [token[1]]
-        else:
-            grouped_tokens[token[0]].append(token[1])
+    tokens = get_initial_tokens()
+    print(f'Generated tokens: {len(tokens)} tkns')
+    grouped_tokens = group_tokens(tokens)
+    print(f'Grouped tokens')
+    filtered_tokens = filter_tokens(grouped_tokens)
+    print(f'Filtered tokens: {sum(len(offsets) for offsets in filtered_tokens.values())} tkns')
+
+    flattened_tokens = flatten_tokens(filtered_tokens)
+    print(f'Flattened tokens')
+    sorted_tokens = sorted(flattened_tokens, key=lambda item: item[1])
+    print(f'Sorted tokens')
+
+    non_overlapped_tokens = remove_overlapping_tokens(sorted_tokens)
+    print(f'Removed redundant tokens: {len(non_overlapped_tokens)} tkns')
+    grouped_tokens = group_tokens(non_overlapped_tokens)
     print(f'Regrouped tokens')
 
     # The redundancy check may have resulted in tokens having some of their offsets removed, so refilter the tokens
@@ -113,7 +139,7 @@ def create_pointer(token_key_index: int) -> bytes:
     byte is always a 0. Example:
     'a' = 01100001
           ^ here
-    So to differentiate between an ASCII character and a pointer, flip that first bit to a 1.
+    So to differentiate between an ASCII character and a pointer, flip that first bit to a 1, by XOR'ing with 0x80
     This results in pointers being 2 bytes.
 
     The rest of the 15 bits are used for the token index, from 0-32768.
@@ -122,8 +148,5 @@ def create_pointer(token_key_index: int) -> bytes:
     :return:
     """
     pointer_bytes = token_key_index.to_bytes(2, 'little')
-    bit_strings = [format(byte, '08b') for byte in pointer_bytes]  # convert bytes to bit strings
-    first_bit_string = bit_strings[0]
-    bit_strings[0] = '1' + first_bit_string[1:]  # flip the first bit to a 1
-    marked_pointer_bytes = bytes([int(bit_strings[0], 2), int(bit_strings[1], 2)])  # convert bit strings back to bytes
+    marked_pointer_bytes = bytes([pointer_bytes[0] ^ 0x80, pointer_bytes[1]])
     return marked_pointer_bytes
