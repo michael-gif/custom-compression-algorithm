@@ -1,5 +1,4 @@
 def obtain_tokens_and_offsets(raw_input: str) -> dict:
-    # generate all tokens and offsets
     def get_initial_tokens() -> list:
         """
         Uses a sliding window to obtain every possible token.
@@ -41,11 +40,12 @@ def obtain_tokens_and_offsets(raw_input: str) -> dict:
         filtered_tokens = {}
         for k, v in tokens_dict.items():
             token_length = len(k)
-            if token_length == 3 and len(v) >= 5:
+            offset_count = len(v)
+            if token_length == 3 and offset_count >= 5:
                 filtered_tokens[k] = v
-            if token_length == 4 and len(v) >= 3:
+            elif token_length == 4 and offset_count >= 3:
                 filtered_tokens[k] = v
-            if token_length >= 5 and len(v) >= 2:
+            elif token_length >= 5 and offset_count >= 2:
                 filtered_tokens[k] = v
         return filtered_tokens
 

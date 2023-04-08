@@ -12,28 +12,29 @@ def compress():
     start = time.perf_counter()
     generated_tokens = obtain_tokens_and_offsets(input_text)
 
-    # sort the tokens in ascending order according to their offsets
+    # flatten the tokens, sorting them in ascending order according to their offsets
     tokens = []
     for token, offsets in generated_tokens.items():
-        for off in offsets:
-            tokens.append((token, off))
+        flattened_token = [(token, off) for off in offsets]
+        tokens += flattened_token
     sorted_tokens = sorted(tokens, key=lambda item: item[1])
 
     print('Adding pointers...')
-    token_keys = list(generated_tokens.keys())
+    # index table with format {token: index} is very efficient compared to doing generated_tokens.index()
+    index_table = {v: i for i, v in enumerate(generated_tokens)}
+    input_text_bytes = input_text.encode()
     compressed_text = b''
     prev_index = 0
-    for i in range(len(sorted_tokens)):
-        token = sorted_tokens[i]
-        prev_text = input_text[prev_index: token[1]].encode()
-        token_key_index = token_keys.index(token[0])
+    for token in sorted_tokens:
+        prev_text = input_text_bytes[prev_index: token[1]]
+        token_key_index = index_table[token[0]]
         pointer = create_pointer(token_key_index)
         compressed_text += prev_text + pointer
         prev_index = token[1] + len(token[0])
 
     # separate each token with a null byte.  0x02 is used to identify the end of the metadata
     print('Generating metadata...')
-    metadata = b'\x00'.join(token.encode() for token in token_keys) + b'\x02'
+    metadata = b'\x00'.join(token.encode() for token in generated_tokens) + b'\x02'
 
     print('Writing to file...')
     with open('compressed.txt', 'wb') as f:
