@@ -1,4 +1,4 @@
-def generate_tokens_and_offsets(raw_input: str):
+def obtain_tokens_and_offsets(raw_input: str) -> dict:
     # generate all tokens and offsets
     tokens = []
     for i in range(3, 4):
@@ -16,7 +16,7 @@ def generate_tokens_and_offsets(raw_input: str):
             grouped_tokens[token[0]].append(token[1])
     print(f'Grouped tokens')
 
-    def filter_tokens(tokens_dict: dict):
+    def filter_tokens(tokens_dict: dict) -> dict:
         """
         Token length | Number of offsets required for compression to be positive
         -------------|----------------------------------------------------------
@@ -51,7 +51,7 @@ def generate_tokens_and_offsets(raw_input: str):
     sorted_tokens = sorted(flattened_tokens, key=lambda item: item[1])
     print(f'Flattened tokens')
 
-    def within_bounds(offset, offset_length, offset2, offset2_length):
+    def within_bounds(offset: int, offset_length: int, offset2: int, offset2_length: int) -> bool:
         if offset2 <= offset <= offset2 + offset2_length:
             return True
         if offset2 <= offset + offset_length <= offset2 + offset2_length:
@@ -103,7 +103,7 @@ def generate_tokens_and_offsets(raw_input: str):
     return filtered_tokens
 
 
-def create_pointer(token_key_index: int):
+def create_pointer(token_key_index: int) -> bytes:
     """
     The pointer is 2 bytes, representing a number from 0-65536
     In order to identify a byte as the first half of a pointer, make the first bit always be 1:
