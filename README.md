@@ -30,7 +30,7 @@ Example: `1000000000000110` -> First bit is `1`, the integer inside is `6`
 ### Results
 | Input file                   | Size before (bytes) | Size after (bytes) | Difference (bytes) | % Difference | Time taken (s) |
 | ---------------------------- | ------------------- | ------------------ | ------------------ | ------------ | -------------- |
-| `bee_movie_script.txt`       | 49473               | 43096              | 6377               | 12.89        | 0.080709       |
-| `joker2019_movie_script.txt` | 226344              | 182467             | 43877              | 19.385       | 0.506485       |
+| `bee_movie_script.txt`       | 49473               | 43096              | 6377               | 12.89        | 0.0847012      |
+| `joker2019_movie_script.txt` | 226344              | 182467             | 43877              | 19.386       | 0.510491       |
 
 As you can see, the compression works.
