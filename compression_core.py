@@ -149,6 +149,6 @@ def create_pointer(token_key_index: int) -> bytes:
     :param token_key_index:
     :return:
     """
-    pointer_bytes = token_key_index.to_bytes(2, 'little')
-    marked_pointer_bytes = bytes([pointer_bytes[0] ^ 0x80, pointer_bytes[1]])
+    #pointer_bytes = token_key_index.to_bytes(2, 'big')
+    marked_pointer_bytes = (token_key_index ^ 0x8000).to_bytes(2, 'big')
     return marked_pointer_bytes

@@ -20,8 +20,11 @@ def compress():
     sorted_tokens = sorted(tokens, key=lambda item: item[1])
 
     print('Adding pointers...')
-    # index table with format {token: index} is very efficient compared to doing generated_tokens.index()
-    index_table = {v: i for i, v in enumerate(generated_tokens)}
+    # sort the tokens according to their length, to make it easier to generate the metadata later
+    sorted_keys = sorted(generated_tokens, key=lambda item: len(item))#, reverse=True)
+    # index table with format {token: index} is very efficient compared to doing sorted_keys.index()
+    index_table = {v: i for i, v in enumerate(sorted_keys)}
+
     input_text_bytes = input_text.encode()
     compressed_text = b''
     prev_index = 0
@@ -32,9 +35,39 @@ def compress():
         compressed_text += prev_text + pointer
         prev_index = token[1] + len(token[0])
 
-    # separate each token with a null byte.  0x02 is used to identify the end of the metadata
+    # join each token with no separators. 0x02 is used to identify the end of the tokens
     print('Generating metadata...')
-    metadata = b'\x00'.join(token.encode() for token in generated_tokens) + b'\x02'
+    metadata = b''.join(token.encode() for token in sorted_keys) + b'\x02'
+
+    # get the frequency of each token length
+    frequencies = defaultdict(lambda: 0)
+    for token in sorted_keys:
+        frequencies[len(token)] += 1
+
+    # flatten into list of tuples, each having max count of 256
+    flattened_frequencies = []
+    for key, count in frequencies.items():
+        if count > 255:
+            for i in range(count // 255):
+                flattened_frequencies.append((key, 255))
+            flattened_frequencies.append((key, count % 255))
+        else:
+            flattened_frequencies.append((key, count))
+    # make sure the list is divisible by 2
+    if len(flattened_frequencies) % 2 != 0:
+        flattened_frequencies.append((0, 0))
+
+    temp = b''
+    # generate the rest of the metadata
+    for i in range(0, len(flattened_frequencies), 2):
+        key_1 = flattened_frequencies[i]
+        key_2 = flattened_frequencies[i + 1]
+        len_1, count_1 = key_1
+        len_2, count_2 = key_2
+        length_byte = ((len_1 << 4) + len_2).to_bytes(1, 'big')
+        count_bytes = count_1.to_bytes(1, 'big') + count_2.to_bytes(1, 'big')
+        temp += length_byte + count_bytes
+    metadata += temp + b'\x02'
 
     print('Writing to file...')
     with open('compressed.txt', 'wb') as f:
@@ -57,5 +90,5 @@ def compress():
 
 
 if __name__ == '__main__':
-    compress()
-    #cProfile.run('compress()', sort='cumtime')
+    #compress()
+    cProfile.run('compress()', sort='cumtime')
