@@ -1,4 +1,5 @@
 import sys
+import time
 import cProfile
 
 from compression_core import ValveProgressBar
@@ -94,6 +95,8 @@ def uncompress():
     Driver code for uncompressing a file.
     :return:
     """
+    start = time.perf_counter()
+
     with open(sys.argv[1], 'rb') as f:
         compressed_bytes = f.read()
 
@@ -104,6 +107,13 @@ def uncompress():
     print('Writing to file')
     with open('decompressed.txt', 'wb') as f:
         f.write(decompressed)
+
+    finish = time.perf_counter()
+
+    results = 'RESULTS'
+    print(f'\n{results:-^37}')
+    print(f"{'Time taken':<25} {finish - start}s")
+    print(f"{results:-^37}")
 
 
 if __name__ == '__main__':
