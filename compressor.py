@@ -90,5 +90,5 @@ def compress():
 
 
 if __name__ == '__main__':
-    #compress()
-    cProfile.run('compress()', sort='cumtime')
+    compress()
+    #cProfile.run('compress()', sort='cumtime')
