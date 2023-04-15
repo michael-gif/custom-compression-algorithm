@@ -1,6 +1,47 @@
 from collections import defaultdict
 
 
+class ValveProgressBar:
+    def __init__(self):
+        self.__parts = ['0', '.', '.', '.', '1', '.', '.', '.', '2', '.', '.', '.', '3', '.', '.', '.', '4', '.', '.',
+                        '.',
+                        '5', '.', '.', '.', '6', '.', '.', '.', '7', '.', '.', '.', '8', '.', '.', '.', '9', '.', '.',
+                        '.',
+                        '10']
+        self.__steps = 0
+        self.__counter = 0
+        self.__index = 0
+        self.__interval = 0
+        self.__complete = False
+
+    def set_steps(self, number_steps: int):
+        """
+        The number of steps to be made before reaching the end of the bar. Not to be confused with the number of visible parts of the bar.
+        :param number_steps:
+        :return:
+        """
+        self.__steps = number_steps
+        self.__interval = number_steps // 41
+
+    def increment(self, steps=1):
+        """
+        If an interval has been reached, print the next part of the progress bar
+        If the progress bar is complete, return.
+        :return:
+        """
+        if self.__complete:
+            return
+
+        self.__counter += steps
+        if not self.__counter % self.__interval:
+            print(self.__parts[self.__index], end='')
+            self.__index += 1
+
+        if self.__counter == self.__steps:
+            self.__complete = True
+            print('\r')
+
+
 def obtain_tokens_and_offsets(raw_input: str) -> dict:
     def get_initial_tokens():
         """
@@ -78,17 +119,13 @@ def obtain_tokens_and_offsets(raw_input: str) -> dict:
         """
         print('Removing redundant tokens: ', end='')
         number_of_tokens = len(tokens)
-        interval = number_of_tokens // 41
-        progress_bar = ['0', '.', '.', '.', '1', '.', '.', '.', '2', '.', '.', '.', '3', '.', '.', '.', '4', '.', '.',
-                        '.',
-                        '5', '.', '.', '.', '6', '.', '.', '.', '7', '.', '.', '.', '8', '.', '.', '.', '9', '.', '.',
-                        '.',
-                        '10']
-        progress_bar_index = 0
+
+        progress_bar = ValveProgressBar()
+        progress_bar.set_steps(number_of_tokens)
 
         unique_tokens = []
-        token_counter = 0
         for token in tokens:
+            progress_bar.increment()
             if not unique_tokens:
                 unique_tokens.append(token)
                 continue
@@ -98,13 +135,6 @@ def obtain_tokens_and_offsets(raw_input: str) -> dict:
             if not within_bounds(token_offset, len(token[0]), unique_token_offset, len(last_token[0])):
                 unique_tokens.append(token)
 
-            # increment progress bar if needed
-            token_counter += 1
-            if token_counter == interval:
-                print(progress_bar[progress_bar_index], end='')
-                progress_bar_index += 1
-                token_counter = 0
-        print('\r')
         return unique_tokens
 
     tokens = list(get_initial_tokens())
@@ -149,6 +179,6 @@ def create_pointer(token_key_index: int) -> bytes:
     :param token_key_index:
     :return:
     """
-    #pointer_bytes = token_key_index.to_bytes(2, 'big')
+    # pointer_bytes = token_key_index.to_bytes(2, 'big')
     marked_pointer_bytes = (token_key_index ^ 0x8000).to_bytes(2, 'big')
     return marked_pointer_bytes
